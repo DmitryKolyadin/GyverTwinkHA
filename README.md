@@ -21,11 +21,13 @@
 
 ## Установка
 
-<!-- **Способ 1.** [HACS](https://hacs.xyz/)
+**Способ 1.** [HACS](https://hacs.xyz/)
 
-> HACS > Интеграции > 3 точки (правый верхний угол) > Пользовательские репозитории > URL: `AlexxIT/GyverLamp`, Категория: Интеграция > Добавить > подождать > GyverLamp > Установить -->
+> HACS > Интеграции > 3 точки (правый верхний угол) > Пользовательские репозитории > URL: `DeveloperDmitryKolyadin/GyverTwinkHA`, Категория: Интеграция > Добавить > подождать > GyverTwink > Установить
 
-Вручную скопируйте папку `gyvertwink` из [latest release](https://github.com/AlexxIT/GyverLamp/releases/latest) в директорию `/config/custom_components`.
+**Способ 2.**
+
+Вручную скопируйте папку `gyvertwink` из [latest release](https://github.com/DeveloperDmitryKolyadin/GyverTwinkHA/releases/latest) в директорию `/config/custom_components`.
 
 ## Настройка
 
