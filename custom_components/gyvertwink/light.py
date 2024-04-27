@@ -3,16 +3,15 @@ import logging
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.light import (
-    PLATFORM_SCHEMA,
+    ColorMode,
     LightEntity,
-    SUPPORT_BRIGHTNESS,
-    SUPPORT_EFFECT,
-    ATTR_BRIGHTNESS,
-    ATTR_EFFECT,
+    LightEntityFeature,
+    PLATFORM_SCHEMA,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 
 from . import DOMAIN
 
@@ -77,102 +76,54 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 
 class GyverTwink(LightEntity):
-    _available = False
-    _brightness = None
-    _host = None
-    _is_on = None
-
-    _effect = None
-    _effects = None
-
-    _twink = None
-
     def __init__(self, config: dict, unique_id=None):
-        self._name = config.get(CONF_NAME, "Gyver Twink")
-        self._unique_id = unique_id
+        self._attr_name = config.get(CONF_NAME, "Gyver Twink")
+        self._attr_unique_id = unique_id
 
-        self.update_config(config)
+        #
+        self._attr_effect_list = config.get(CONF_EFFECTS, EFFECTS)
+        self._attr_should_poll = True
+        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF}
+        self._attr_supported_features = LightEntityFeature.EFFECT
 
-    @property
-    def should_poll(self):
-        return True
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, unique_id)},
+            manufacturer="@AlexGyver",
+            model="GyverTwink",
+        )
 
-    @property
-    def unique_id(self):
-        return self._unique_id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def brightness(self):
-        return self._brightness
-
-    @property
-    def effect_list(self):
-        return self._effects
-
-    @property
-    def effect(self):
-        return self._effect
-
-    @property
-    def supported_features(self):
-        return SUPPORT_BRIGHTNESS | SUPPORT_EFFECT
-
-    @property
-    def is_on(self):
-        return self._is_on
-
-    @property
-    def available(self):
-        return self._available
-
-    @property
-    def device_info(self):
-        """
-        https://developers.home-assistant.io/docs/device_registry_index/
-        """
-        return {
-            "identifiers": {(DOMAIN, self._unique_id)},
-            "manufacturer": "@AlexGyver",
-            "model": "GyverTwink",
-        }
+        self.host = config[CONF_HOST]
 
     @property
     def address(self):
-        return self._host
+        return self.host
 
     @property
     def twink(self):
         return GTwink(self.address)
 
     def debug(self, message):
-        _LOGGER.debug(f"{self._host} | {message}")
+        _LOGGER.debug(f"{self.host} | {message}")
 
-    def update_config(self, config: dict):
-        self._effects = config.get(CONF_EFFECTS, EFFECTS)
-        self._host = config[CONF_HOST]
-
-        if self.hass:
-            self._async_write_ha_state()
-
-    def turn_on(self, **kwargs):
+    def turn_on(
+        self,
+        brightness: int = None,
+        effect: str = None,
+    ):
         self.twink.on()
 
         try:
-            self.twink.set_brightness(kwargs[ATTR_BRIGHTNESS])
+            if brightness:
+                self.twink.set_brightness(brightness)
         except:
-            self.debug(f"set_brightness/ {kwargs}")
+            self.debug(f"set_brightness/ {brightness}")
 
         try:
-            eff_name = kwargs[ATTR_EFFECT]
-            eff_id = self._effects.index(eff_name)
-
-            self.twink.select_effect(eff_id)
+            if effect:
+                eff_id = self._effects.index(effect)
+                self.twink.select_effect(eff_id)
         except:
-            self.debug(f"set_brightness/ {kwargs}")
+            self.debug(f"set_brightness/ {effect}")
 
     def turn_off(self, **kwargs):
         self.twink.off()
@@ -182,8 +133,8 @@ class GyverTwink(LightEntity):
             data = self.twink.get_settings()
             self.debug(f"UPDATE {data}")
 
-            self._is_on = data["power"]
-            self._brightness = int(data["brightness"])
+            self._attr_is_on = data["power"]
+            self._attr_brightness = int(data["brightness"])
 
             self._auto_change = data["auto_change"]
             self._random_change = data["random_change"]
@@ -193,8 +144,8 @@ class GyverTwink(LightEntity):
 
             self._effect = None
 
-            self._available = True
+            self._attr_available = True
 
         except Exception as e:
             self.debug(f"Can't update: {e}")
-            self._available = False
+            self._attr_available = False
