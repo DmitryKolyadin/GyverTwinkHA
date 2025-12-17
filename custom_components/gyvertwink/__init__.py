@@ -19,8 +19,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     entry.add_update_listener(async_update_options)
 
     # forward to light setup
-    coro = hass.config_entries.async_forward_entry_setups(entry, ["light"])
-    hass.async_create_task(coro)
+    await hass.config_entries.async_forward_entry_setups(entry, ["light"])
 
     return True
 
