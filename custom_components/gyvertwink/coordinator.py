@@ -37,7 +37,7 @@ class GyverTwinkCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         """Получение данных от устройства.
         
-        Этот метод вызывается автоматически каждые 30 секунд.
+        Этот метод вызывается автоматически каждые 15 секунд.
         Все entities получат эти данные без дополнительных запросов.
         """
         try:
