@@ -83,7 +83,7 @@ class GyverTwink(LightEntity):
         #
         self._attr_effect_list = config.get(CONF_EFFECTS, EFFECTS)
         self._attr_should_poll = True
-        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF}
+        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS}
         self._attr_supported_features = LightEntityFeature.EFFECT
 
         self._attr_device_info = DeviceInfo(
