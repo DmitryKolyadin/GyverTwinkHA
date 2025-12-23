@@ -3,10 +3,10 @@ import logging
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.light import (
+    PLATFORM_SCHEMA,
     ColorMode,
     LightEntity,
     LightEntityFeature,
-    PLATFORM_SCHEMA,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_NAME
@@ -70,7 +70,7 @@ async def async_setup_entry(
     """Настройка из config entry."""
     # Получаем coordinator из hass.data
     coordinator: GyverTwinkCoordinator = hass.data[DOMAIN][entry.entry_id]
-    
+
     # Создаем light entity с coordinator
     entity = GyverTwinkLight(entry.options, entry.entry_id, coordinator)
     async_add_entities([entity], True)
@@ -89,7 +89,7 @@ class GyverTwinkLight(CoordinatorEntity, LightEntity):
         # Инициализируем CoordinatorEntity если coordinator доступен
         if coordinator:
             super().__init__(coordinator)
-        
+
         self._attr_name = config.get(CONF_NAME, "Gyver Twink")
         self._attr_unique_id = unique_id
         self.host = config[CONF_HOST]
@@ -145,18 +145,18 @@ class GyverTwinkLight(CoordinatorEntity, LightEntity):
                     eff_id = self._attr_effect_list.index(effect)
                     if self._coordinator:
                         await self._coordinator.async_select_effect(eff_id)
-                    
+
                     self._attr_effect = effect
                     self._current_effect_index = eff_id
                     self.debug(f"Effect set to: {effect} (ID: {eff_id})")
-                        
+
                 except ValueError:
                     self.debug(f"Effect not found: {effect}")
                 except Exception as e:
                     self.debug(f"Error setting effect: {e}")
 
             self._attr_is_on = True
-            
+
         except Exception as e:
             self.debug(f"Error in turn_on: {e}")
             raise
@@ -171,10 +171,10 @@ class GyverTwinkLight(CoordinatorEntity, LightEntity):
                 await self.hass.async_add_executor_job(
                     self._coordinator.twink.set_power, False
                 )
-            
+
             self._attr_is_on = False
             self.debug("Turned off")
-            
+
         except Exception as e:
             self.debug(f"Error in turn_off: {e}")
             raise
@@ -182,7 +182,7 @@ class GyverTwinkLight(CoordinatorEntity, LightEntity):
     @property
     def available(self) -> bool:
         """Доступность entity.
-        
+
         CoordinatorEntity автоматически управляет доступностью на основе
         успешности обновлений coordinator.
         """
@@ -192,7 +192,7 @@ class GyverTwinkLight(CoordinatorEntity, LightEntity):
 
     def _handle_coordinator_update(self) -> None:
         """Обработка обновления данных от coordinator.
-        
+
         Этот метод вызывается автоматически когда coordinator получает новые данные.
         Все entities получают данные из одного запроса - нет множественных таймаутов.
         """
